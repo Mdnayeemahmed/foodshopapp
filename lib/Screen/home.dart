@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:foodshopapp/Screen/AuthService.dart';
+import 'package:foodshopapp/Screen/login_screen.dart';
+import 'package:get/get.dart';
 
 import '../utilities/app_colors.dart';
 import '../widgets/resturant_card.dart';
 
 class Home extends StatelessWidget {
+  AuthService _authService = AuthService();
   final CollectionReference<Map<String, dynamic>> restaurantCollection =
   FirebaseFirestore.instance.collection('restaurants');
 
@@ -13,6 +17,15 @@ class Home extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Order Now'),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                await _authService.signOut();
+                Get.offAll(loginscreen());
+              },
+              icon: Icon(Icons.output))
+        ],
+
       ),
       body: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
         future: restaurantCollection.get(),

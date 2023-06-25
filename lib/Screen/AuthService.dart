@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final CollectionReference _usersCollection =
   FirebaseFirestore.instance.collection('Users');
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 
   // Sign up with email and password
@@ -32,11 +36,23 @@ class AuthService {
   }
 
   // Sign in with email and password
-  Future<UserCredential?> signInWithEmailAndPassword(
-      String email, String password) async {
+  Future<UserCredential?> signInWithEmailAndPassword(String email, String password) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+      DocumentSnapshot snapshot = await _firestore
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .get();
+
+      bool isRestaurant =
+          (snapshot.data() as Map<String, dynamic>)['IsRestaurant'] as bool? ?? false;
+
+      // Save user login status and user type
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isLoggedIn', true);
+      prefs.setBool('isRestaurant', isRestaurant);
+      print(isRestaurant);
 
       return userCredential;
     } catch (e) {
@@ -46,9 +62,14 @@ class AuthService {
     }
   }
 
+
   // Sign out
   Future<void> signOut() async {
     try {
+      // Clear user login status
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isLoggedIn', false);
+
       await _auth.signOut();
     } catch (e) {
       // Handle sign-out errors

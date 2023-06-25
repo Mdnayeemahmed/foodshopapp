@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:foodshopapp/Screen/dashboard.dart';
 import 'package:foodshopapp/Screen/login_screen.dart';
-import 'package:get/get.dart';
+import 'package:foodshopapp/Screen/resturant_dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../utilities/app_colors.dart';
-import 'cartitem.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -21,9 +21,23 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void navigateToDashboard() {
-    Future.delayed(Duration(milliseconds: 50), () {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => loginscreen()));
+    Future.delayed(Duration(milliseconds: 50), () async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      bool isRestaurant = prefs.getBool('isRestaurant') ?? false;
+
+      if (isLoggedIn) {
+        if (isRestaurant) {
+          // Restaurant user is logged in, navigate to the restaurant dashboard
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ResturantDeshboard()));
+        } else {
+          // Regular user is logged in, navigate to the regular dashboard
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Dashboard()));
+        }
+      } else {
+        // User is not logged in, navigate to the login screen
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => loginscreen()));
+      }
     });
   }
 

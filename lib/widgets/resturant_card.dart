@@ -3,33 +3,46 @@ import 'package:get/get.dart';
 
 import '../Screen/menupage.dart';
 import '../utilities/app_colors.dart';
+import 'dart:convert';
 
-class resturant_card extends StatelessWidget {
-  const resturant_card({
-    super.key, required this.ResturantName, required this.Catagory, required this.DeliveryTime, required this.ImageUrl,
+class ResturantCard extends StatelessWidget {
+  final String resturantId; // Add resturantId parameter
+  final String resturantName;
+  final String category;
+  final String deliveryTime;
+  final String imageUrl;
+
+  const ResturantCard({
+    required this.resturantId,
+    required this.resturantName,
+    required this.category,
+    required this.deliveryTime,
+    required this.imageUrl,
   });
-  final String ResturantName,Catagory,DeliveryTime, ImageUrl;
 
   @override
   Widget build(BuildContext context) {
+    final imageBytes = base64Decode(imageUrl);
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
         width: 140,
         child: InkWell(
           onTap: () {
-            Get.to(MenuPage());
+            Get.to(MenuPage(restaurantId: resturantId)); // Pass the resturantId parameter
           },
           borderRadius: BorderRadius.circular(10),
           child: Card(
             elevation: 3,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
+              borderRadius: BorderRadius.circular(10),
+            ),
             shadowColor: primaryColor.withOpacity(0.2),
             child: Column(
               children: [
-                Image.network(
-                  ImageUrl,
+                Image.memory(
+                  imageBytes,
                   width: 132,
                   height: 90,
                   fit: BoxFit.cover,
@@ -41,45 +54,41 @@ class resturant_card extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        ResturantName,
+                        resturantName,
                         style: TextStyle(
-                            fontSize: 12,
-                            letterSpacing: 0.3,
-                            height: 1.2,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black),
+                          fontSize: 12,
+                          letterSpacing: 0.3,
+                          height: 1.2,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
                       ),
-                      SizedBox(
-                        height: 4,
-                      ),
+                      SizedBox(height: 4),
                       Text(
-                        Catagory,
+                        category,
                         style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 0.3,
-                            height: 1.2,
-                            fontWeight: FontWeight.w500,
-                            color: greyColor.withOpacity(0.7)),
+                          fontSize: 10,
+                          letterSpacing: 0.3,
+                          height: 1.2,
+                          fontWeight: FontWeight.w500,
+                          color: greyColor.withOpacity(0.7),
+                        ),
                       ),
-                      SizedBox(
-                        height: 4,
-                      ),
+                      SizedBox(height: 4),
                       Text(
-                        'Within in ' +DeliveryTime ,
+                        'Within ' + deliveryTime,
                         style: TextStyle(
-                            fontSize: 8,
-                            letterSpacing: 0.3,
-                            height: 1.2,
-                            fontWeight: FontWeight.w500,
-                            color: greyColor.withOpacity(0.7)),
+                          fontSize: 8,
+                          letterSpacing: 0.3,
+                          height: 1.2,
+                          fontWeight: FontWeight.w500,
+                          color: greyColor.withOpacity(0.7),
+                        ),
                       ),
-                      SizedBox(
-                        height: 4,
-                      )
-
+                      SizedBox(height: 4),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

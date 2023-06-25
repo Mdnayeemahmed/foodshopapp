@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:foodshopapp/Screen/dashboard.dart';
+import 'package:foodshopapp/Screen/login_screen.dart';
 import 'package:get/get.dart';
 import '../utilities/app_colors.dart';
+import 'cartitem.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -11,6 +13,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
   @override
   void initState() {
     super.initState();
@@ -20,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void navigateToDashboard() {
     Future.delayed(Duration(milliseconds: 50), () {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => dashboard()));
+          context, MaterialPageRoute(builder: (context) => loginscreen()));
     });
   }
 

@@ -14,3 +14,9 @@ TextStyle subStyle= TextStyle(
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5
 );
+
+TextStyle highlight= TextStyle(
+    color: primaryColor,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.5
+);

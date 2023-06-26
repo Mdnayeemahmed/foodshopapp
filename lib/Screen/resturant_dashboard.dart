@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foodshopapp/Screen/CreateMenu.dart';
-import 'package:foodshopapp/Screen/ViewOrderStatus.dart';
+import 'package:foodshopapp/Screen/Ordermanagmentresturant.dart';
 import 'package:get/get.dart';
 
 import '../utilities/app_colors.dart';
@@ -94,7 +94,7 @@ class _ResturantDeshboardState extends State<ResturantDeshboard> {
               common_container(
                 title: 'View On Going Order',
                 onTap: () {
-                  Get.to(ViewOrderStatus());
+                  Get.to(OrderManagementRestaurant());
                 },
               )
             ],

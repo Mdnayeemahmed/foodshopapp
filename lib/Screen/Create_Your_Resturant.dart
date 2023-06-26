@@ -142,72 +142,45 @@ class _CreateRestaurantState extends State<CreateRestaurant> {
       final uid = user?.uid;
 
       if (uid != null) {
-        final restaurantQuery = await FirebaseFirestore.instance
+        final restaurantData = {
+          'restaurantName': restaurantName,
+          'category': category,
+          'deliveryTime': deliveryTime,
+          'image': _base64Image,
+        };
+
+        await FirebaseFirestore.instance
             .collection('restaurants')
-            .where('restaurantName', isEqualTo: restaurantName)
-            .where('userId', isEqualTo: uid)
-            .get();
+            .doc(uid)
+            .set(restaurantData);
 
-        if (restaurantQuery.docs.isNotEmpty) {
-          // Restaurant already exists for the current user
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Error'),
-                content: Text('You have already created a restaurant with the same name.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        } else {
-          final restaurantData = {
-            'restaurantName': restaurantName,
-            'category': category,
-            'deliveryTime': deliveryTime,
-            'image': _base64Image,
-            'userId': uid,
-          };
+        // Reset form fields
+        _restaurantNameController.clear();
+        _selectedCategory = '';
+        _deliveryTimeController.clear();
+        setState(() {
+          _imageFile = null;
+          _base64Image = null;
+        });
 
-          await FirebaseFirestore.instance
-              .collection('restaurants')
-              .add(restaurantData);
-
-          // Reset form fields
-          _restaurantNameController.clear();
-          _selectedCategory = '';
-          _deliveryTimeController.clear();
-          setState(() {
-            _imageFile = null;
-            _base64Image = null;
-          });
-
-          // Show success message or navigate to the next screen
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Success'),
-                content: const Text('Restaurant created successfully!'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
+        // Show success message or navigate to the next screen
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Success'),
+              content: const Text('Restaurant created successfully!'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       }
     } catch (error) {
       // Show error message

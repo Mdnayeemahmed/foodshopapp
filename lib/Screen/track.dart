@@ -14,79 +14,97 @@ class TrackOrder extends StatefulWidget {
 class _TrackOrderState extends State<TrackOrder> {
   final User? user = FirebaseAuth.instance.currentUser;
   StreamSubscription<QuerySnapshot>? _orderSubscription;
-  Timer? _timer;
-  bool _isOrderCancelled = false;
+  Map<String, Timer> _orderTimers = {}; // Store timers for each order
+  Map<String, bool> _isOrderCancelled = {
+  }; // Track cancellation state for each order
 
   @override
   void initState() {
     super.initState();
-    startOrderTimer();
+    startOrderSubscription();
   }
 
   @override
   void dispose() {
-    cancelOrderTimer();
-    _orderSubscription?.cancel();
+    cancelOrderSubscription();
+    cancelAllOrderTimers();
     super.dispose();
   }
 
-  void startOrderTimer() {
+  void startOrderSubscription() {
     _orderSubscription = FirebaseFirestore.instance
         .collection('orders')
         .where('customerId', isEqualTo: user!.uid)
+        .where('orderStatus', isEqualTo: 'Pending')
         .snapshots()
         .listen((snapshot) {
-      if (snapshot.docs.isNotEmpty) {
-        final orderData = snapshot.docs[0].data() as Map<String, dynamic>;
-        final orderStatus = orderData['orderStatus'] as String? ?? '';
+      for (final change in snapshot.docChanges) {
+        final orderId = change.doc.id;
+        final orderData = change.doc.data() as Map<String, dynamic>;
         final placedTimestamp = orderData['placedTimestamp'] as Timestamp?;
 
-        if (orderStatus == 'Pending' &&
-            placedTimestamp != null &&
-            !_isOrderCancelled) {
-          final currentTime = Timestamp.now();
-          final difference = currentTime.millisecondsSinceEpoch -
-              placedTimestamp.millisecondsSinceEpoch;
+        if (change.type == DocumentChangeType.added) {
+          if (placedTimestamp != null &&
+              !_isOrderCancelled.containsKey(orderId)) {
+            final currentTime = Timestamp.now();
+            final difference = currentTime.millisecondsSinceEpoch -
+                placedTimestamp.millisecondsSinceEpoch;
 
-          if (difference >= 60000) { // 1 minute = 60 seconds = 60000 milliseconds
-            cancelOrder();
+            if (difference >= 60000) {
+              cancelOrder(orderId);
+              setState(() {
+                _isOrderCancelled[orderId] = true;
+              });
+            } else {
+              final remainingTime = 60000 - difference;
+              startTimer(orderId, remainingTime);
+            }
+          }
+        } else if (change.type == DocumentChangeType.modified) {
+          if (orderData['orderStatus'] == 'Cancelled') {
+            cancelOrderTimer(orderId);
             setState(() {
-              _isOrderCancelled = true;
+              _isOrderCancelled[orderId] = true;
             });
-          } else {
-            final remainingTime = 60000 - difference;
-            startTimer(remainingTime);
           }
         }
       }
     });
   }
 
-  void startTimer(int duration) {
-    cancelOrderTimer();
-    _timer = Timer(Duration(milliseconds: duration), () {
-      cancelOrder();
+  void cancelOrderSubscription() {
+    _orderSubscription?.cancel();
+  }
+
+  void startTimer(String orderId, int duration) {
+    cancelOrderTimer(orderId);
+    _orderTimers[orderId] = Timer(Duration(milliseconds: duration), () {
+      cancelOrder(orderId);
       setState(() {
-        _isOrderCancelled = true;
+        _isOrderCancelled[orderId] = true;
       });
     });
   }
 
-  void cancelOrder() {
+  void cancelOrder(String orderId) {
     FirebaseFirestore.instance
         .collection('orders')
-        .where('customerId', isEqualTo: user!.uid)
-        .get()
-        .then((snapshot) {
-      if (snapshot.docs.isNotEmpty) {
-        final orderRef = snapshot.docs[0].reference;
-        orderRef.update({'orderStatus': 'Cancelled'});
-      }
+        .doc(orderId)
+        .update({'orderStatus': 'Cancelled'})
+        .catchError((error) {
+      // Handle the error if necessary
     });
   }
 
-  void cancelOrderTimer() {
-    _timer?.cancel();
+  void cancelOrderTimer(String orderId) {
+    _orderTimers[orderId]?.cancel();
+  }
+
+  void cancelAllOrderTimers() {
+    for (final timer in _orderTimers.values) {
+      timer.cancel();
+    }
+    _orderTimers.clear();
   }
 
   @override

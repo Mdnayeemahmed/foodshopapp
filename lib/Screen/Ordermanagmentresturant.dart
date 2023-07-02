@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodshopapp/utilities/set_color.dart';
 
+import 'AuthService.dart';
+
 class OrderManagementRestaurant extends StatefulWidget {
   const OrderManagementRestaurant({Key? key}) : super(key: key);
 
@@ -14,6 +16,8 @@ class OrderManagementRestaurant extends StatefulWidget {
 class _OrderManagementRestaurantState extends State<OrderManagementRestaurant> {
   late String currentUserId;
   late Stream<QuerySnapshot> orderStream = Stream.empty();
+  AuthService _authService = AuthService();
+
 
   @override
   void initState() {
@@ -45,11 +49,35 @@ class _OrderManagementRestaurantState extends State<OrderManagementRestaurant> {
     }
   }
 
-  void updateOrderStatus(String orderId, String newStatus) {
-    FirebaseFirestore.instance.collection('orders').doc(orderId).update({
+  void updateOrderStatus(String orderId, String newStatus) async {
+    await FirebaseFirestore.instance.collection('orders').doc(orderId).update({
       'orderStatus': newStatus,
     });
+
+    final orderSnapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .doc(orderId)
+        .get();
+
+    if (orderSnapshot.exists) {
+      final orderData = orderSnapshot.data() as Map<String, dynamic>?;
+      final customerId = orderData?['customerId'] as String?;
+
+      final tokenSnapshot = await FirebaseFirestore.instance
+          .collection('UserTokens')
+          .where('currentUserUID', isEqualTo: customerId)
+          .get();
+
+      if (tokenSnapshot.docs.isNotEmpty) {
+        final token = tokenSnapshot.docs.first.data()['token'] as String?;
+        print(token);
+        _authService.sendPushMessage(token!, newStatus, 'Order Alert');
+      } else {
+        print('No token found for the customer');
+      }
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +145,8 @@ class _OrderManagementRestaurantState extends State<OrderManagementRestaurant> {
                               TextButton(
                                 onPressed: () {
                                   updateOrderStatus(orderId, 'Processing');
+
+                                  //add notification
                                 },
                                 style: TextButton.styleFrom(
                                   backgroundColor: Colors.blue,
@@ -144,6 +174,8 @@ class _OrderManagementRestaurantState extends State<OrderManagementRestaurant> {
                                             onPressed: () {
                                               updateOrderStatus(
                                                   orderId, 'Cancelled');
+                                              //add notification
+
                                               Navigator.of(context).pop();
                                             },
                                             child: Text('Yes'),
@@ -175,6 +207,8 @@ class _OrderManagementRestaurantState extends State<OrderManagementRestaurant> {
                                         onPressed: () {
                                           updateOrderStatus(
                                               orderId, 'Delivered');
+                                          //add notification
+
                                           Navigator.of(context).pop();
                                         },
                                         child: Text('Yes'),

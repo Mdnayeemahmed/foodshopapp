@@ -26,6 +26,8 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+
+
 android {
     namespace "com.example.foodshopapp"
     compileSdkVersion 33
@@ -49,7 +51,7 @@ android {
         applicationId "com.example.foodshopapp"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion 22
+        minSdkVersion 25
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -72,4 +74,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation platform('com.google.firebase:firebase-bom:30.2.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.android.gms:play-services-base:18.2.0'
+    implementation 'com.google.firebase:firebase-messaging:23.1.2'
+    implementation files('path/to/libcolorx-loader.so')
+
+
+
 }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foodshopapp/Screen/CreateMenu.dart';
@@ -26,6 +27,72 @@ class _ResturantDeshboardState extends State<ResturantDeshboard> {
   void initState() {
     super.initState();
     _getUserData();
+    gettoken();
+  }
+
+
+  gettoken() async {
+    String? currentUserUID = (await _authService.getCurrentUser())?.uid;
+    String deviceToken = await _authService.getDeviceToken();
+
+    setState(() {
+      retrieveRestaurantId(currentUserUID!, deviceToken);
+    });
+  }
+
+  void retrieveRestaurantId(String currentUserUID, String deviceToken) async {
+    try {
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection("restaurants")
+          .where("userId", isEqualTo: currentUserUID)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final DocumentSnapshot doc = snapshot.docs.first;
+        final String restaurantId = doc.id;
+
+        saveToken(deviceToken, currentUserUID, restaurantId);
+      } else {
+        print("No restaurant found with matching userId");
+      }
+    } catch (e) {
+      print('Error retrieving restaurant ID: $e');
+    }
+  }
+
+
+
+
+  void saveToken(String token, String currentUserUID, String resturantid) async {
+    try {
+      final collectionRef = FirebaseFirestore.instance.collection("UserTokens");
+      final querySnapshot = await collectionRef.where('currentUserUID', isEqualTo: currentUserUID).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final existingDoc = querySnapshot.docs.first;
+        final existingToken = existingDoc.data()['token'];
+        final existingResturantId = existingDoc.data()['resturantid'];
+
+        if (existingToken != token || existingResturantId != resturantid) {
+          await existingDoc.reference.update({
+            'token': token,
+            'resturantid': resturantid,
+          });
+          print('Token and resturantid updated successfully!');
+        } else {
+          print('Token and resturantid already up to date!');
+        }
+      } else {
+        await collectionRef.add({
+          'currentUserUID': currentUserUID,
+          'token': token,
+          'resturantid': resturantid,
+        });
+        print('Token and resturantid saved successfully!');
+      }
+    } catch (e) {
+      print('Error saving token and resturantid: $e');
+    }
   }
 
   Future<void> _getUserData() async {

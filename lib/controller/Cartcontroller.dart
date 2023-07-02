@@ -3,9 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../Screen/AuthService.dart';
 import '../Screen/cartitem.dart';
 
 class CartController extends GetxController {
+  AuthService _authService = AuthService();
   RxList<CartItem> cartItems = <CartItem>[].obs;
   RxDouble totalPrice = 0.0.obs;
 
@@ -58,7 +60,6 @@ class CartController extends GetxController {
     calculateTotalPrice();
     update(); // Notify GetX that the cart items have changed
   }
-
   void placeOrder() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -97,10 +98,22 @@ class CartController extends GetxController {
           'phoneNumber': userPhoneNumber,
           'address': userAddress,
           'orderStatus': 'Pending',
-          // Add the orderStatus field with the value "Pending"
         };
 
         await FirebaseFirestore.instance.collection('orders').add(orderData);
+
+        final tokenSnapshot = await FirebaseFirestore.instance
+            .collection('UserTokens')
+            .where('resturantid', isEqualTo: restaurantId)
+            .get();
+
+        if (tokenSnapshot.docs.isNotEmpty) {
+          final token = tokenSnapshot.docs.first.data()['token'] as String?;
+          print(token);
+          _authService.sendPushMessage(token!, 'New Order Available', 'New Order Alert');
+        } else {
+          print('No token found for the restaurant');
+        }
 
         // Remove the cart document for the user
         cartSnapshot.docs.forEach((doc) {

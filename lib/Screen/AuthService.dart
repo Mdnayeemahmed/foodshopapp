@@ -20,7 +20,7 @@ class AuthService {
 
   // Sign up with email and password
   Future<UserCredential?> signUpWithEmailAndPassword(
-      String email, String password, String fullName, bool isResturant) async {
+      String email, String password, String fullName, bool isResturant,String address,String Phonenumber) async {
     try {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -30,7 +30,8 @@ class AuthService {
         'Email': email,
         'FullName': fullName,
         'IsRestaurant': isResturant,
-
+        'Address':address,
+        'Phonenumber':Phonenumber
       });
 
       return userCredential;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../utilities/app_colors.dart';
 
 class commontextfield extends StatelessWidget {

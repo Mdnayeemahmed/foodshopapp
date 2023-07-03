@@ -1,16 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:foodshopapp/Screen/CreateMenu.dart';
-import 'package:foodshopapp/Screen/Ordermanagmentresturant.dart';
+import 'package:foodshopapp/Screen/Resturant/CreateMenu.dart';
+import 'package:foodshopapp/Screen/Resturant/Create_Your_Resturant.dart';
+import 'package:foodshopapp/Screen/Resturant/Ordermanagmentresturant.dart';
 import 'package:get/get.dart';
 
-import '../utilities/app_colors.dart';
-import '../utilities/common_style.dart';
-import '../widgets/common_container.dart';
-import 'AuthService.dart';
-import 'Create_Your_Resturant.dart';
-import 'login_screen.dart';
+import '../../utilities/app_colors.dart';
+import '../../utilities/common_style.dart';
+import '../../widgets/common_container.dart';
+import '../AuthService.dart';
+import '../login_screen.dart';
+
 
 class ResturantDeshboard extends StatefulWidget {
   const ResturantDeshboard({Key? key}) : super(key: key);

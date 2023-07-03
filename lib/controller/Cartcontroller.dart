@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../Screen/AuthService.dart';
-import '../Screen/cartitem.dart';
+import '../Screen/User/cartitem.dart';
 
 class CartController extends GetxController {
   AuthService _authService = AuthService();

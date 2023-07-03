@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/Cartcontroller.dart';
+import '../../controller/Cartcontroller.dart';
 
 class CartPage extends StatelessWidget {
   final cartController = Get.put(CartController());

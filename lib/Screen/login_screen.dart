@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:foodshopapp/Screen/dashboard.dart';
+import 'package:foodshopapp/Screen/Resturant/resturant_dashboard.dart';
+import 'package:foodshopapp/Screen/User/dashboard.dart';
 import 'package:foodshopapp/Screen/signup.dart';
-import 'package:foodshopapp/Screen/resturant_dashboard.dart';
 import 'package:get/get.dart';
 import '../../utilities/common_style.dart';
 import '../../widgets/common_button_style.dart';

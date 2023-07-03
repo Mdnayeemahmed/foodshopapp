@@ -1,8 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:foodshopapp/Screen/dashboard.dart';
+import 'package:foodshopapp/Screen/Resturant/resturant_dashboard.dart';
+import 'package:foodshopapp/Screen/User/dashboard.dart';
 import 'package:foodshopapp/Screen/login_screen.dart';
-import 'package:foodshopapp/Screen/resturant_dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utilities/app_colors.dart';
 

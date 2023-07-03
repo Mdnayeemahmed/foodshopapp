@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 
-import 'package:foodshopapp/Screen/cart.dart';
+import 'package:foodshopapp/Screen/User/cart.dart';
+import 'package:foodshopapp/Screen/User/reviewpage.dart';
 
 class MenuPage extends StatelessWidget {
   final String restaurantId;
@@ -15,6 +16,19 @@ class MenuPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Menu'),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewScreen(restaurantId: restaurantId),
+                  ),
+                );
+              },
+              icon: Icon(Icons.rate_review),
+            ),
+          ]
       ),
       body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
         future: FirebaseFirestore.instance
@@ -110,38 +124,57 @@ class MenuPage extends StatelessWidget {
     FirebaseFirestore.instance
         .collection('cart')
         .where('userId', isEqualTo: userId)
-        .where('restaurantId', isEqualTo: restaurantId)
         .get()
         .then((querySnapshot) {
       if (querySnapshot.size > 0) {
-        // Cart document exists, update the orderedItems array
-        final cartDoc = querySnapshot.docs.first;
-        final List<dynamic> orderedItems = cartDoc.data()['orderedItems'] as List<dynamic>;
-        orderedItems.add(cartItem);
-        cartDoc.reference.update({
-          'orderedItems': orderedItems,
-        }).then((_) {
-          showSnackbar(context, 'Item added to cart', 'View Cart');
-        }).catchError((error) {
-          showSnackbar(context, 'Failed to add item to cart: $error', 'Retry');
-        });
-      } else {
-        // Cart document does not exist, create a new one
-        FirebaseFirestore.instance
-            .collection('cart')
-            .add({
-          'userId': userId,
-          'restaurantId': restaurantId,
-          'orderedItems': [cartItem],
-        })
-            .then((_) {
-          showSnackbar(context, 'Item added to cart', 'View Cart');
-        }).catchError((error) {
-          showSnackbar(context, 'Failed to add item to cart: $error', 'Retry');
+        // Delete previous cart documents for different restaurants
+        querySnapshot.docs.forEach((doc) {
+          final existingRestaurantId = doc.data()['restaurantId'] as String?;
+          if (existingRestaurantId != restaurantId) {
+            doc.reference.delete();
+          }
         });
       }
+
+      // Create a new cart document or update existing cart document
+      FirebaseFirestore.instance
+          .collection('cart')
+          .where('userId', isEqualTo: userId)
+          .where('restaurantId', isEqualTo: restaurantId)
+          .get()
+          .then((querySnapshot) {
+        if (querySnapshot.size > 0) {
+          // Cart document exists, update the orderedItems array
+          final cartDoc = querySnapshot.docs.first;
+          final List<dynamic> orderedItems = cartDoc.data()['orderedItems'] as List<dynamic>;
+          orderedItems.add(cartItem);
+          cartDoc.reference.update({
+            'orderedItems': orderedItems,
+          }).then((_) {
+            showSnackbar(context, 'Item added to cart', 'View Cart');
+          }).catchError((error) {
+            showSnackbar(context, 'Failed to add item to cart: $error', 'Retry');
+          });
+        } else {
+          // Cart document does not exist, create a new one
+          FirebaseFirestore.instance
+              .collection('cart')
+              .add({
+            'userId': userId,
+            'restaurantId': restaurantId,
+            'orderedItems': [cartItem],
+          })
+              .then((_) {
+            showSnackbar(context, 'Item added to cart', 'View Cart');
+          }).catchError((error) {
+            showSnackbar(context, 'Failed to add item to cart: $error', 'Retry');
+          });
+        }
+      }).catchError((error) {
+        showSnackbar(context, 'Failed to check cart existence: $error', 'Retry');
+      });
     }).catchError((error) {
-      showSnackbar(context, 'Failed to check cart existence: $error', 'Retry');
+      showSnackbar(context, 'Failed to fetch cart documents: $error', 'Retry');
     });
   }
 

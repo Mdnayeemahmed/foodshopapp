@@ -146,12 +146,13 @@ class _CreateRestaurantState extends State<CreateRestaurant> {
           'restaurantName': restaurantName,
           'category': category,
           'deliveryTime': deliveryTime,
+          'userId':uid,
           'image': _base64Image,
         };
 
         await FirebaseFirestore.instance
             .collection('restaurants')
-            .doc(uid)
+            .doc()
             .set(restaurantData);
 
         // Reset form fields

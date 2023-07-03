@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:foodshopapp/Screen/account.dart';
-import 'package:foodshopapp/Screen/cart.dart';
-import 'package:foodshopapp/Screen/home.dart';
-import 'package:foodshopapp/Screen/track.dart';
+import 'package:foodshopapp/Screen/User/account.dart';
+import 'package:foodshopapp/Screen/User/cart.dart';
+import 'package:foodshopapp/Screen/User/home.dart';
+import 'package:foodshopapp/Screen/User/track.dart';
 import 'package:get/get.dart';
 
-import '../controller/bottom_bar_nav_controller.dart';
-import '../utilities/app_colors.dart';
+import '../../controller/bottom_bar_nav_controller.dart';
+import '../../utilities/app_colors.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -19,11 +19,11 @@ class _DashboardState extends State<Dashboard> {
   final BottombarNavController _bottombarNavController =
   Get.put(BottombarNavController());
 
-  List<Widget> _screens = [
+  final List<Widget> _screens = [
     Home(),
     TrackOrder(),
     CartPage(),
-    account(),
+    Account(),
   ];
 
    // Keep track of cart items here

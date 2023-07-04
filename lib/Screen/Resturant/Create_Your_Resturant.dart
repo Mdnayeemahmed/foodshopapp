@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:foodshopapp/Screen/Resturant/resturant_dashboard.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateRestaurant extends StatefulWidget {
@@ -21,7 +22,7 @@ class _CreateRestaurantState extends State<CreateRestaurant> {
   File? _imageFile;
   String? _base64Image;
 
-  List<String> _categories = [
+  final List<String> _categories = [
     'Fast Food',
     'Bangla,Thai,Chinese',
     'Dessert',
@@ -175,6 +176,9 @@ class _CreateRestaurantState extends State<CreateRestaurant> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const ResturantDeshboard()),
+                    );
                   },
                   child: const Text('OK'),
                 ),

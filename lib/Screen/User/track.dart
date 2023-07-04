@@ -15,8 +15,7 @@ class _TrackOrderState extends State<TrackOrder> {
   final User? user = FirebaseAuth.instance.currentUser;
   StreamSubscription<QuerySnapshot>? _orderSubscription;
   Map<String, Timer> _orderTimers = {}; // Store timers for each order
-  Map<String, bool> _isOrderCancelled = {
-  }; // Track cancellation state for each order
+  Map<String, bool> _isOrderCancelled = {}; // Track cancellation state for each order
 
   @override
   void initState() {
@@ -35,28 +34,27 @@ class _TrackOrderState extends State<TrackOrder> {
     _orderSubscription = FirebaseFirestore.instance
         .collection('orders')
         .where('customerId', isEqualTo: user!.uid)
-        .where('orderStatus', isEqualTo: 'Pending')
         .snapshots()
         .listen((snapshot) {
       for (final change in snapshot.docChanges) {
         final orderId = change.doc.id;
         final orderData = change.doc.data() as Map<String, dynamic>;
-        final placedTimestamp = orderData['placedTimestamp'] as Timestamp?;
 
         if (change.type == DocumentChangeType.added) {
-          if (placedTimestamp != null &&
-              !_isOrderCancelled.containsKey(orderId)) {
+          if (!_isOrderCancelled.containsKey(orderId) && orderData['orderStatus'] == 'Pending') {
+            final placedTimestamp = orderData['placedTimestamp'] as Timestamp?;
             final currentTime = Timestamp.now();
             final difference = currentTime.millisecondsSinceEpoch -
-                placedTimestamp.millisecondsSinceEpoch;
+                placedTimestamp!.millisecondsSinceEpoch;
 
-            if (difference >= 60000) {
+            if (difference >= 1200000) {
+              //for 20 min
               cancelOrder(orderId);
               setState(() {
                 _isOrderCancelled[orderId] = true;
               });
             } else {
-              final remainingTime = 60000 - difference;
+              final remainingTime = 1200000 - difference;
               startTimer(orderId, remainingTime);
             }
           }

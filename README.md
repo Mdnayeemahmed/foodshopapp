@@ -37,6 +37,17 @@ A new Flutter project.
 
 ![Screenshot_2023-07-05-15-25-22-35_7fb0e0b67eca58e4aa75b2efad16652b](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/913dd357-4392-4344-a2d2-e9ef7976218e)
 
+![image](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/6c302ed7-cdfb-43e6-acc6-f140da43be27)
+
+![image](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/778557fd-1a02-4afe-8522-253636bc1727)
+
+![image](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/cf9a6c60-42b7-4d92-a629-7b4b4756368f)
+
+![image](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/662be2e4-36af-44e7-a862-64a495d871d5)
+
+![Screenshot_2023-07-05-15-25-31-90_7fb0e0b67eca58e4aa75b2efad16652b](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/b70a4d5d-1892-4135-a2d0-4a61e375f972)
+
+
 
 
 ## Notification Ui

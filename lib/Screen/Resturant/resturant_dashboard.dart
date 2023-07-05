@@ -109,7 +109,7 @@ class _ResturantDeshboardState extends State<ResturantDeshboard> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: primaryColor,
+          backgroundColor: Colors.yellowAccent,
           flexibleSpace: Container(
             margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: Column(
@@ -117,7 +117,7 @@ class _ResturantDeshboardState extends State<ResturantDeshboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'What Are You Cooking Today!',
+                  'Resturant Dashboard',
                   style: titleStyle,
                 ),
                 Text(

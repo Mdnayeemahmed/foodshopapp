@@ -129,7 +129,7 @@ class CartController extends GetxController {
               TextButton(
                 onPressed: () {
                   Get.back();
-                  Get.back(); // Pop back to the previous screen
+                  Get.back();
                 },
                 child: Text('OK'),
               ),

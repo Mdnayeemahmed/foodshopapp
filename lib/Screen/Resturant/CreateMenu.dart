@@ -73,7 +73,13 @@ class _CreatemenuState extends State<Createmenu> {
         .get();
 
     if (userRestaurantsSnapshot.docs.isEmpty) {
-      print('User has no restaurants. Create First');
+      // Show snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('User has no restaurants. Create First'),
+        ),
+      );
+
       return;
     }
 
@@ -110,9 +116,16 @@ class _CreatemenuState extends State<Createmenu> {
       });
       _menuItems.clear();
       setState(() {});
-      print('Menu items saved successfully!');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Menu items saved successfully!'),
+        ),
+      );
     } catch (error) {
-      print('Error saving menu items: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+                content: Text('Error saving menu items: $error'),
+      ));
     }
   }
 

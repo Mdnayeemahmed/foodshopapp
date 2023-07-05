@@ -16,91 +16,94 @@ class MenuPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Menu'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ReviewScreen(restaurantId: restaurantId),
-                  ),
-                );
-              },
-              icon: Icon(Icons.rate_review),
-            ),
-          ]
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReviewScreen(restaurantId: restaurantId),
+                ),
+              );
+            },
+            icon: Icon(Icons.rate_review),
+          ),
+        ],
       ),
-      body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        future: FirebaseFirestore.instance
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
             .collection('menus')
             .doc(restaurantId)
-            .get(),
+            .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData) {
-              final menuData = snapshot.data!.data();
-              final menuItems = menuData?['menuItems'] as List<dynamic>?;
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-              if (menuItems != null) {
-                return ListView.builder(
-                  itemCount: menuItems.length,
-                  itemBuilder: (context, index) {
-                    final data = menuItems[index];
-                    final base64Image = data['base64Image'] as String?;
+          if (snapshot.hasData) {
+            final menuData = snapshot.data!.data() as Map<String, dynamic>?;
+            final menuItems = menuData?['menuItems'] as List<dynamic>?;
 
-                    return ListTile(
-                      leading: base64Image != null
-                          ? Image.memory(
-                        base64Decode(base64Image),
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      )
-                          : Container(
-                        width: 60,
-                        height: 60,
-                        color: Colors.grey, // Placeholder color
-                      ),
-                      title: Text(
-                        data['itemName'] ?? '',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data['description'] ?? '',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            '\$${(data['price'] as num?)?.toDouble().toStringAsFixed(2) ?? ''}',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      trailing: ElevatedButton(
-                        onPressed: () {
-                          final FirebaseAuth _auth = FirebaseAuth.instance;
-                          final User? user = _auth.currentUser;
-                          if (user != null) {
-                            final String userId = user.uid;
-                            addToCart(data, restaurantId, userId, context);
-                          } else {
-                            print('User is not signed in');
-                          }
-                        },
-                        child: Text('Add to Cart'),
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return Center(child: Text('No menu items available.'));
-              }
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+            if (menuItems != null && menuItems.isNotEmpty) {
+              return ListView.builder(
+                itemCount: menuItems.length,
+                itemBuilder: (context, index) {
+                  final data = menuItems[index];
+                  final base64Image = data['base64Image'] as String?;
+
+                  return ListTile(
+                    leading: base64Image != null && base64Image.isNotEmpty
+                        ? Image.memory(
+                      base64Decode(base64Image),
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    )
+                        : Image.network(
+                      'https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
+                    title: Text(
+                      data['itemName'] ?? '',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data['description'] ?? '',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          '\$${(data['price'] as num?)?.toDouble().toStringAsFixed(2) ?? ''}',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    trailing: ElevatedButton(
+                      onPressed: () {
+                        final FirebaseAuth _auth = FirebaseAuth.instance;
+                        final User? user = _auth.currentUser;
+                        if (user != null) {
+                          final String userId = user.uid;
+                          addToCart(data, restaurantId, userId, context);
+                        } else {
+                          print('User is not signed in');
+                        }
+                      },
+                      child: Text('Add to Cart'),
+                    ),
+                  );
+                },
+              );
+            } else {
+              return Center(child: Text('No menu items available.'));
             }
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
           return Center(child: CircularProgressIndicator());
@@ -109,7 +112,8 @@ class MenuPage extends StatelessWidget {
     );
   }
 
-  void addToCart(Map<String, dynamic> itemData, String restaurantId, String userId, BuildContext context) {
+  void addToCart(Map<String, dynamic> itemData, String restaurantId,
+      String userId, BuildContext context) {
     // Get the item details
     final String itemName = itemData['itemName'] as String? ?? '';
     final double itemPrice = (itemData['price'] as num?)?.toDouble() ?? 0.0;
@@ -146,32 +150,33 @@ class MenuPage extends StatelessWidget {
         if (querySnapshot.size > 0) {
           // Cart document exists, update the orderedItems array
           final cartDoc = querySnapshot.docs.first;
-          final List<dynamic> orderedItems = cartDoc.data()['orderedItems'] as List<dynamic>;
+          final List<dynamic> orderedItems =
+              cartDoc.data()['orderedItems'] as List<dynamic>;
           orderedItems.add(cartItem);
           cartDoc.reference.update({
             'orderedItems': orderedItems,
           }).then((_) {
             showSnackbar(context, 'Item added to cart', 'View Cart');
           }).catchError((error) {
-            showSnackbar(context, 'Failed to add item to cart: $error', 'Retry');
+            showSnackbar(
+                context, 'Failed to add item to cart: $error', 'Retry');
           });
         } else {
           // Cart document does not exist, create a new one
-          FirebaseFirestore.instance
-              .collection('cart')
-              .add({
+          FirebaseFirestore.instance.collection('cart').add({
             'userId': userId,
             'restaurantId': restaurantId,
             'orderedItems': [cartItem],
-          })
-              .then((_) {
+          }).then((_) {
             showSnackbar(context, 'Item added to cart', 'View Cart');
           }).catchError((error) {
-            showSnackbar(context, 'Failed to add item to cart: $error', 'Retry');
+            showSnackbar(
+                context, 'Failed to add item to cart: $error', 'Retry');
           });
         }
       }).catchError((error) {
-        showSnackbar(context, 'Failed to check cart existence: $error', 'Retry');
+        showSnackbar(
+            context, 'Failed to check cart existence: $error', 'Retry');
       });
     }).catchError((error) {
       showSnackbar(context, 'Failed to fetch cart documents: $error', 'Retry');
@@ -185,7 +190,6 @@ class MenuPage extends StatelessWidget {
         action: SnackBarAction(
           label: actionText,
           onPressed: () {
-            // Handle snackbar action here
             if (actionText == 'View Cart') {
               // Navigate to the cart page
               // Replace `CartPage` with the actual cart page widget
@@ -203,4 +207,3 @@ class MenuPage extends StatelessWidget {
     );
   }
 }
-

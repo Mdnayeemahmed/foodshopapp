@@ -98,9 +98,9 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
       // Check if the user has a delivered order with the restaurant
       FirebaseFirestore.instance
           .collection('orders')
-          .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .where('customerId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .where('restaurantId', isEqualTo: widget.restaurantId)
-          .where('status', isEqualTo: 'delivered')
+          .where('orderStatus', isEqualTo: 'Delivered')
           .get()
           .then((querySnapshot) {
         if (querySnapshot.size > 0) {

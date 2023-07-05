@@ -20,7 +20,7 @@ class common_container extends StatelessWidget {
         height: 100,
         width: 100,
         decoration: BoxDecoration(
-          color: primaryColor.withOpacity(0.15),
+          color: Colors.yellow.withOpacity(0.15),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(

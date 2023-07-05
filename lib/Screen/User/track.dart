@@ -16,6 +16,7 @@ class _TrackOrderState extends State<TrackOrder> {
   StreamSubscription<QuerySnapshot>? _orderSubscription;
   Map<String, Timer> _orderTimers = {}; // Store timers for each order
   Map<String, bool> _isOrderCancelled = {}; // Track cancellation state for each order
+  Map<String, int> _remainingTimes = {}; // Store remaining time for each order
 
   @override
   void initState() {
@@ -41,7 +42,8 @@ class _TrackOrderState extends State<TrackOrder> {
         final orderData = change.doc.data() as Map<String, dynamic>;
 
         if (change.type == DocumentChangeType.added) {
-          if (!_isOrderCancelled.containsKey(orderId) && orderData['orderStatus'] == 'Pending') {
+          if (!_isOrderCancelled.containsKey(orderId) &&
+              orderData['orderStatus'] == 'Pending') {
             final placedTimestamp = orderData['placedTimestamp'] as Timestamp?;
             final currentTime = Timestamp.now();
             final difference = currentTime.millisecondsSinceEpoch -
@@ -55,7 +57,8 @@ class _TrackOrderState extends State<TrackOrder> {
               });
             } else {
               final remainingTime = 1200000 - difference;
-              startTimer(orderId, remainingTime);
+              _remainingTimes[orderId] = remainingTime;
+              startTimer(orderId);
             }
           }
         } else if (change.type == DocumentChangeType.modified) {
@@ -74,15 +77,35 @@ class _TrackOrderState extends State<TrackOrder> {
     _orderSubscription?.cancel();
   }
 
-  void startTimer(String orderId, int duration) {
-    cancelOrderTimer(orderId);
-    _orderTimers[orderId] = Timer(Duration(milliseconds: duration), () {
-      cancelOrder(orderId);
-      setState(() {
+  void startTimer(String orderId) {
+    if (_orderTimers.containsKey(orderId)) {
+      // Timer already exists, no need to start a new one
+      return;
+    }
+
+    final streamController = StreamController<int>();
+    final stream = streamController.stream;
+
+    stream.listen((remainingTime) {
+      _remainingTimes[orderId] = remainingTime;
+
+      if (remainingTime <= 0) {
+        cancelOrder(orderId);
         _isOrderCancelled[orderId] = true;
-      });
+        cancelOrderTimer(orderId);
+      }
     });
+
+    final timer = Timer.periodic(Duration(seconds: 1), (_) {
+      if (_remainingTimes.containsKey(orderId)) {
+        final remainingTime = _remainingTimes[orderId]!;
+        streamController.add(remainingTime - 1000);
+      }
+    });
+
+    _orderTimers[orderId] = timer;
   }
+
 
   void cancelOrder(String orderId) {
     FirebaseFirestore.instance
@@ -145,6 +168,7 @@ class _TrackOrderState extends State<TrackOrder> {
               return OrderCard(
                 orderId: orderId,
                 orderStatus: orderStatus,
+                remainingTime: _remainingTimes[orderId],
               );
             },
           );

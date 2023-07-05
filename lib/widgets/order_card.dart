@@ -1,43 +1,82 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../utilities/set_color.dart';
 
 class OrderCard extends StatefulWidget {
   final String orderId;
   final String orderStatus;
+  final int? remainingTime;
 
-  const OrderCard({required this.orderId, required this.orderStatus});
+  const OrderCard({
+    required this.orderId,
+    required this.orderStatus,
+    this.remainingTime,
+  });
 
   @override
   _OrderCardState createState() => _OrderCardState();
 }
 
-class _OrderCardState extends State<OrderCard> {
-  Timer? _countdownTimer;
+class _OrderCardState extends State<OrderCard> with TickerProviderStateMixin {
+  BehaviorSubject<DateTime> _currentTimeStream = BehaviorSubject<DateTime>();
+  StreamSubscription<DateTime>? _subscription;
+  AnimationController? _controller;
+  Animation<double>? _animation;
   String _countdown = '';
 
   @override
   void initState() {
     super.initState();
-    if (widget.orderStatus == 'Pending') {
-      startCountdown();
-    }
+    subscribeToCurrentTime();
+    startCountdown();
   }
 
   @override
   void dispose() {
-    cancelCountdown();
+    _currentTimeStream.close();
+    _subscription?.cancel();
+    _controller?.dispose();
     super.dispose();
+  }
+
+  void subscribeToCurrentTime() {
+    _subscription = Stream.periodic(Duration(seconds: 1), (_) => DateTime.now())
+        .listen((currentTime) {
+      _currentTimeStream.add(currentTime);
+    });
   }
 
   void startCountdown() {
     final DateFormat formatter = DateFormat('mm:ss');
     final DateTime expirationTime = DateTime.now().add(Duration(minutes: 20));
+    final DateTime currentTime = DateTime.now();
+    final Duration remainingTime = widget.remainingTime != null
+        ? Duration(milliseconds: widget.remainingTime!)
+        : expirationTime.difference(currentTime);
 
-    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    if (remainingTime.inSeconds <= 0) {
+      cancelCountdown();
+      return;
+    }
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: remainingTime.inMilliseconds),
+    );
+
+    _animation = Tween<double>(begin: remainingTime.inMilliseconds.toDouble(), end: 0).animate(_controller!)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          cancelCountdown();
+        }
+      });
+
+    _controller!.forward();
+
+    Timer.periodic(Duration(seconds: 1), (_) {
       final DateTime currentTime = DateTime.now();
       final Duration remainingTime = expirationTime.difference(currentTime);
 
@@ -61,25 +100,12 @@ class _OrderCardState extends State<OrderCard> {
         _countdown = formattedRemainingTime;
       });
     });
-
-    final String formattedExpirationTime = formatter.format(
-      DateTime(
-        0,
-        0,
-        0,
-        0,
-        expirationTime.minute,
-        expirationTime.second,
-      ),
-    );
-
-    setState(() {
-      _countdown = formattedExpirationTime;
-    });
   }
 
   void cancelCountdown() {
-    _countdownTimer?.cancel();
+    setState(() {
+      _countdown = 'Expired';
+    });
   }
 
   @override
@@ -95,7 +121,17 @@ class _OrderCardState extends State<OrderCard> {
           children: [
             Text('Order Status: ${widget.orderStatus}'),
             if (widget.orderStatus == 'Pending')
-              Text('Time Remaining To Accept or Cancel Order: $_countdown'),
+              AnimatedBuilder(
+                animation: _animation!,
+                builder: (context, child) {
+                  final milliseconds = _animation!.value.toInt();
+                  final formattedTime = DateFormat('mm:ss').format(DateTime(0, 0, 0, 0, 0, 0, 0).add(Duration(milliseconds: milliseconds)));
+
+                  return Text(
+                    'Time Remaining To Update Order: $formattedTime',
+                  );
+                },
+              ),
           ],
         ),
       ),

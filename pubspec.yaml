@@ -36,15 +36,18 @@ dependencies:
   firebase_auth: ^4.2.1
   cloud_firestore_platform_interface: ^5.9.1
   cloud_firestore: ^4.8.1
-  flutter_launcher_icons: ^0.13.1
   image_picker: ^0.8.4+4
   shared_preferences: ^2.0.10
   firebase_messaging: ^14.6.4
-
-  workmanager: ^0.5.1
   flutter_local_notifications: ^14.1.1
-  flutter_background_service: ^3.0.1
   intl: ^0.18.1
+  flutter_launcher_icons: ^0.13.1
+  rxdart: ^0.27.7
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/foodlogo.png"
 
 
 dev_dependencies:

@@ -143,11 +143,32 @@ class _CreateRestaurantState extends State<CreateRestaurant> {
       final uid = user?.uid;
 
       if (uid != null) {
+        if (_base64Image == null || _base64Image!.isEmpty) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: const Text('Please select an image.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+          return;
+        }
+
         final restaurantData = {
           'restaurantName': restaurantName,
           'category': category,
           'deliveryTime': deliveryTime,
-          'userId':uid,
+          'userId': uid,
           'image': _base64Image,
         };
 
@@ -188,7 +209,7 @@ class _CreateRestaurantState extends State<CreateRestaurant> {
         );
       }
     } catch (error) {
-      // Show error message
+
       showDialog(
         context: context,
         builder: (context) {

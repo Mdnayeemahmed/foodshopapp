@@ -18,18 +18,13 @@ class HomeController extends GetxController {
     getAndSaveToken();
   }
 
-  void fetchRestaurants() async {
-    try {
-      final QuerySnapshot<Map<String, dynamic>> snapshot =
-      await restaurantCollection.get();
-
-      final Iterable<Map<String, dynamic>> restaurantData =
-      snapshot.docs.map((doc) {
+  void fetchRestaurants() {
+    restaurantCollection.snapshots().listen((snapshot) {
+      final List<Map<dynamic, dynamic>> restaurantData = snapshot.docs.map((doc) {
         final Map<String, dynamic>? data = doc.data();
         if (data != null) {
           final String imageUrl = data['image'] ?? '';
-          final String base64Image =
-          data['image'] != null ? data['image'].toString() : '';
+          final String base64Image = data['image'] != null ? data['image'].toString() : '';
           final String restaurantId = doc.id; // Retrieve the document ID
 
           return {
@@ -41,13 +36,14 @@ class HomeController extends GetxController {
           };
         }
         return {}; // Empty map if data is null
-      });
+      }).toList();
 
-      restaurants.assignAll(restaurantData);
+      final List<Map<String, dynamic>> typedRestaurantData = restaurantData.cast<Map<String, dynamic>>();
+      restaurants.assignAll(typedRestaurantData);
       isLoading.value = false;
-    } catch (e) {
-      print('Error fetching restaurants: $e');
-    }
+    }, onError: (error) {
+      print('Error fetching restaurants: $error');
+    });
   }
 
   void getAndSaveToken() async {

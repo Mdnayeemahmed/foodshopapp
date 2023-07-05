@@ -1,6 +1,8 @@
 # foodshopapp
 
-A new Flutter project.
+A online food delivery app base on firebase and local notificiation.App demo Link
+
+https://drive.google.com/file/d/1z0UBXzJ9BEeJ8HsdYFjZME1Zo98oYwU0/view?usp=sharing
 
 ## Login & Sign-Up Ui
 

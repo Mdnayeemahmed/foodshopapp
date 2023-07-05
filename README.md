@@ -27,4 +27,17 @@ A new Flutter project.
 
 ![Screenshot_2023-07-05-15-30-04-58_7fb0e0b67eca58e4aa75b2efad16652b](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/bfd35c3d-38ed-43d0-9592-6538d67ade57)
 
+## Resturant Ui
+![Screenshot_2023-07-05-15-25-14-83_7fb0e0b67eca58e4aa75b2efad16652b](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/5f7b133a-f617-4f3d-8d74-da8e8e332c8c)
+
+![Screenshot_2023-07-05-15-25-18-52_7fb0e0b67eca58e4aa75b2efad16652b](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/0f86688e-32de-460d-86de-27791d35bd2a)
+
+
+![Screenshot_2023-07-05-15-25-22-35_7fb0e0b67eca58e4aa75b2efad16652b](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/913dd357-4392-4344-a2d2-e9ef7976218e)
+
+
+
+## Notification Ui
+
+![Screenshot_2023-07-05-15-27-17-56_7fb0e0b67eca58e4aa75b2efad16652b](https://github.com/Mdnayeemahmed/foodshopapp/assets/93244952/c26bfd20-bdfb-4624-88c2-df2da788c69d)
 
